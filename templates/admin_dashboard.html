@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genesis | Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>👨‍💻 Admin Dashboard</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul style="color: lime;">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <nav>
+        <a href="/admin/blog">📜 Manage Blog</a> |
+        <a href="/admin/upload">📁 Upload to Portfolio</a> |
+        <a href="/admin/change-credentials">🔐 Change Admin Credentials</a> |
+        <a href="/logout">🚪 Logout</a>
+    </nav>
+
+    <hr>
+
+    <section>
+        <h2>Genesis Handlers & Contact</h2>
+        <p><strong>Lord Alpha:</strong> 0978748089</p>
+        <p><strong>Lord Cosmo:</strong> 0570227897</p>
+        <p><strong>Email:</strong> jameschandamapipo@gmail.com</p>
+    </section>
+
+    <hr>
+
+    <section>
+        <h2>Achievements</h2>
+        <ul>
+            <li>✅ Created full-stack hacker-themed portfolio site</li>
+            <li>✅ Integrated file uploads (PDF, MP4, MP3, images)</li>
+            <li>✅ Blog and dashboard management secured</li>
+            <li>✅ Admin credentials now stored in .env file</li>
+            <li>✅ Site tested on Android & desktop devices</li>
+        </ul>
+    </section>
+
+    <a href="/">🔙 Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact Me</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Contact Me</h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li style="color:lime;">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <input type="text" name="name" placeholder="Your Name" required><br><br>
+        <input type="email" name="email" placeholder="Your Email" required><br><br>
+        <textarea name="message" rows="5" placeholder="Your Message" required></textarea><br><br>
+        <button type="submit">Send</button>
+    </form>
+    <hr>
+<h2>Team Contacts</h2>
+<ul style="list-style-type: none; color: #00ffcc;">
+    <li><strong>Handler 1:</strong> Lord Alpha - 0978748089/076298683</li>
+    <li><strong>Handler 2:</strong> Lord Cosmo - 0570227897</li>
+    <li><strong>Email:</strong> <a href="jameschandamapipo@gmail.com" style="color: #00ffcc;">thegenesisgroup@proton.me</a></li>
+    <li><strong>Email:</strong> <a href="chindimaduncan4@gmail.com" style="color: #00ffcc;">thegenesisgroup@proton.me</a></li>
+</ul>
+
+    <a href="/">Back to Home</a>
+    <script src="{{ url_for('static', filename='matrix.js') }}"></script>
+</body>
+</html>

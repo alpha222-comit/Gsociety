@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Achievement</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Post Team Achievement</h1>
+
+        <form method="POST" enctype="multipart/form-data">
+            <label>Title:</label>
+            <input type="text" name="title" required>
+
+            <label>Description:</label>
+            <textarea name="description" required></textarea>
+
+            <label>Upload File (MP3/MP4/PDF/Image):</label>
+            <input type="file" name="file">
+
+            <button type="submit">Post Achievement</button>
+        </form>
+
+        <a href="/dashboard">Back to Admin Dashboard</a>
+    </div>
+</body>
+</html>

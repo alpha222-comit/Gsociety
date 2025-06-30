@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genesis Blog</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>📓 Genesis Blog</h1>
+
+    {% if posts %}
+        {% for post in posts %}
+        <div class="post">
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.content }}</p>
+            <hr>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No posts yet. Stay tuned.</p>
+    {% endif %}
+
+    <a href="/">Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genesis Terminal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            background-color: black;
+            color: #00ff00;
+            font-family: monospace;
+            padding: 20px;
+        }
+        #terminal {
+            background-color: #000;
+            border: 1px solid #00ff00;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+            min-height: 400px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+        }
+        #input-line {
+            display: flex;
+        }
+        #input-line span {
+            margin-right: 5px;
+        }
+        input {
+            background: black;
+            color: #00ff00;
+            border: none;
+            outline: none;
+            font-family: monospace;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Genesis Web Terminal</h1>
+    <div id="terminal">
+        <div id="output"></div>
+        <div id="input-line">
+            <span>&gt;</span>
+            <input type="text" id="cmdInput" autofocus>
+        </div>
+    </div>
+    <a href="/">Back to Home</a>
+
+    <script>
+        const cmdInput = document.getElementById("cmdInput");
+        const output = document.getElementById("output");
+
+        const responses = {
+            "whoami": "root@genesis",
+            "ls": "index.html\nprojects.html\nskills.html\nterminal.html\ncontact.html",
+            "pwd": "/var/www/genesis",
+            "nmap": "Starting Nmap 7.93...\nPORT     STATE SERVICE\n22/tcp   open  ssh\n80/tcp   open  http\n443/tcp  open  https",
+            "help": "Available commands: whoami, ls, pwd, nmap, clear, help"
+        };
+
+        cmdInput.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                const cmd = cmdInput.value.trim();
+                output.innerHTML += `> ${cmd}\n`;
+
+                if (cmd === "clear") {
+                    output.innerHTML = "";
+                } else {
+                    output.innerHTML += (responses[cmd] || "Command not found") + "\n";
+                }
+
+                cmdInput.value = "";
+                const terminalDiv = document.getElementById("terminal");
+                terminalDiv.scrollTop = terminalDiv.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>

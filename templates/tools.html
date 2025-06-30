@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genesis Arsenal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Genesis Arsenal</h1>
+    <div class="tools-container">
+        {% for tool in tools %}
+        <div class="tool-card">
+            <h2>{{ tool.name }}</h2>
+            <p>{{ tool.description }}</p>
+            <a href="{{ tool.link }}">Launch</a>
+        </div>
+        {% endfor %}
+    </div>
+    <a href="/">Back to Home</a>
+    <script src="{{ url_for('static', filename='matrix.js') }}"></script>
+</body>
+</html>

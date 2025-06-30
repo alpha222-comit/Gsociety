@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Team Member</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>👨‍💻 Add Team Member</h1>
+
+        <form method="POST" enctype="multipart/form-data">
+            <label>Name:</label>
+            <input type="text" name="name" required>
+
+            <label>Role:</label>
+            <input type="text" name="role" required>
+
+            <label>Bio (optional):</label>
+            <textarea name="bio"></textarea>
+
+            <label>Image (JPG/PNG):</label>
+            <input type="file" name="image">
+
+            <button type="submit">Upload</button>
+        </form>
+
+        <a href="/dashboard">Back to Admin Dashboard</a>
+    </div>
+</body>
+</html>
