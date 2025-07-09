@@ -1,24 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Genesis Blog</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <h1>📓 Genesis Blog</h1>
-
-    {% if posts %}
+{% extends "base.html" %}
+{% block title %}Blog Index{% endblock %}
+{% block content %}
+<div class="terminal-header">Blog Transmission Log</div>
+<div class="terminal-body">
+    <ul class="post-list">
         {% for post in posts %}
-        <div class="post">
-            <h2>{{ post.title }}</h2>
-            <p>{{ post.content }}</p>
-            <hr>
-        </div>
+        <li>
+            <span class="post-date">[{{ post.date_posted.strftime('%Y-%m-%d') }}]</span>
+            <a href="{{ url_for('blog_post', post_id=post.id) }}">{{ post.title }}</a>
+        </li>
+        {% else %}
+        <li>// No transmissions logged. The channel is quiet.</li>
         {% endfor %}
-    {% else %}
-        <p>No posts yet. Stay tuned.</p>
-    {% endif %}
-
-    <a href="/">Back to Home</a>
-</body>
-</html>
+    </ul>
+</div>
+<style>
+.post-list { list-style-type: none; padding: 0; }
+.post-list li { margin-bottom: 0.5rem; display: flex; align-items: center; }
+.post-list .post-date { color: #888; margin-right: 1rem; text-shadow: none; }
+.post-list a { color: var(--text-color); text-decoration: none; }
+.post-list a:hover { color: var(--highlight-color); }
+</style>
+{% endblock %}

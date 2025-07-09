@@ -1,27 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Upload Achievement</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>🏆 Post Team Achievement</h1>
+{% extends "base.html" %}
 
-        <form method="POST" enctype="multipart/form-data">
-            <label>Title:</label>
-            <input type="text" name="title" required>
+{% block title %}Manage Achievements - Genesis{% endblock %}
 
-            <label>Description:</label>
-            <textarea name="description" required></textarea>
+{% block content %}
+<h1>🏆 Upload Team Achievements</h1>
 
-            <label>Upload File (MP3/MP4/PDF/Image):</label>
-            <input type="file" name="file">
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul style="color: lime;">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 
-            <button type="submit">Post Achievement</button>
-        </form>
+<form action="{{ url_for('add_achievement') }}" method="post" enctype="multipart/form-data">
+  <label>Title:</label>
+  <input type="text" name="title" required>
 
-        <a href="/dashboard">Back to Admin Dashboard</a>
-    </div>
-</body>
-</html>
+  <label>Description:</label>
+  <textarea name="description" rows="4" required></textarea>
+
+  <label>Upload File (image, PDF, MP3, MP4):</label>
+  <input type="file" name="file" required>
+
+  <button type="submit">Submit Achievement</button>
+</form>
+
+<hr>
+
+<h2>🎯 Existing Achievements</h2>
+<ul>
+  {% for a in achievements %}
+    <li><strong>{{ a[1] }}</strong> - {{ a[2] }}</li>
+  {% endfor %}
+</ul>
+
+<br>
+<a href="{{ url_for('admin_panel') }}">← Back to Admin Panel</a>
+{% endblock %}

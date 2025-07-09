@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Terminal Upload{% endblock %}
+
+{% block content %}
+<h1 class="glow">🖥 Terminal Upload</h1>
+<form method="POST" enctype="multipart/form-data">
+  <label>Upload File:</label><br>
+  <input type="file" name="file"><br>
+  <label>YouTube Video Link:</label><br>
+  <input type="text" name="youtube"><br>
+  <button type="submit">Upload</button>
+</form>
+{% endblock %}

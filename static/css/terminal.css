@@ -1,0 +1,33 @@
+body {
+    margin: 0;
+    background-color: #000;
+    color: #00ff00;
+    font-family: monospace;
+    height: 100vh;
+}
+
+#terminal {
+    padding: 10px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+#input-line {
+    display: flex;
+    align-items: center;
+}
+
+.user {
+    margin-right: 5px;
+    color: cyan;
+}
+
+#command {
+    background: none;
+    border: none;
+    color: #00ff00;
+    flex-grow: 1;
+    font-family: monospace;
+    font-size: 1em;
+    outline: none;
+}

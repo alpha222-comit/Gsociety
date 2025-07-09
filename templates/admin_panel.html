@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h1>👨‍💻 Admin Dashboard</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul style="color: lime;">
+      {% for category, message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<ul>
+  <li><a href="{{ url_for('admin_blog') }}">📜 Manage Blog</a></li>
+  <li><a href="{{ url_for('admin_terminal_uploads') }}">💾 Terminal Uploads</a></li>
+  <li><a href="{{ url_for('change_credentials') }}">🔐 Change Admin Credentials</a></li>
+  <li><a href="{{ url_for('logout') }}">🚪 Logout</a></li>
+</ul>
+
+<hr>
+
+<section>
+  <h2>Genesis Handlers & Contact</h2>
+  <p><strong>Lord Alpha:</strong> 0978748089</p>
+  <p><strong>Lord Cosmo:</strong> 0570227897</p>
+  <p><strong>Lord zero:</strong> </p>
+  <p><strong>Email:</strong> jameschandamapipo@gmail.com</p>
+  <p><strong>Email:</strong> chindimaduncan4@gmail.com</p>
+
+</section>
+
+<hr>
+
+<section>
+  <h2>✅ Admin Achievements</h2>
+  <ul>
+    <li>🚀 Full-stack hacker-themed portfolio deployed</li>
+    <li>📁 File uploads: images, PDFs, MP4s, MP3s</li>
+    <li>🧠 GBJ AI integrated</li>
+    <li>🔐 Password-protected admin panel</li>
+    <li>📱 Responsive design for Android/Desktop</li>
+  </ul>
+</section>
+
+<a href="{{ url_for('home') }}">🔙 Back to Home</a>
+{% endblock %}

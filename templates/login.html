@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Admin Access{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="terminal-header">Admin Authentication Required</div>
+    <form method="POST" class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        
+        <button type="submit" class="button">Authenticate</button>
+    </form>
+</div>
+
+<style>
+.form-container {
+    max-width: 500px;
+    margin: 2rem auto;
+}
+</style>
+{% endblock %}

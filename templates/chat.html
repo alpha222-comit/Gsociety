@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat</title>
+  <link rel="stylesheet" href="{{ url_for('static','css/style.css') }}">
+  <meta http-equiv="refresh" content="5">
+</head>
+<body>
+  <h1>Visitor Chat</h1>
+  <form method="POST">
+    <input name="user" placeholder="Your Name" required>
+    <textarea name="message" placeholder="Type a message..."></textarea>
+    <button type="submit">Send</button>
+  </form>
+  <div class="chatlog">
+    {% if os.path.exists('chat.json') %}
+      {% for line in open('chat.json').read().splitlines() %}
+        <p>{{ line }}</p>
+      {% endfor %}
+    {% endif %}
+  </div>
+  <a href="/">← Home</a>
+</body>
+</html>

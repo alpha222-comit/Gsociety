@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Manage Payment Methods{% endblock %}
+{% block content %}
+<div class="terminal-header">Manage Support Payment Methods</div>
+
+<div class="form-container" style="max-width: 800px; margin: 2rem auto;">
+    <h2>Add New Method</h2>
+    <form method="POST" class="form-group">
+        <label for="method_name">Method Name (e.g., "Bitcoin", "MTN Money"):</label>
+        <input type="text" id="method_name" name="method_name" required>
+        
+        <label for="details">Details (e.g., wallet address, phone number, email):</label>
+        <input type="text" id="details" name="details" required>
+
+        <label for="category">Category:</label>
+        <select id="category" name="category" required>
+            <option value="Zambian">Zambian</option>
+            <option value="International">International</option>
+        </select>
+        
+        <button type="submit" class="button" style="margin-top: 1rem;">Add Method</button>
+    </form>
+</div>
+
+<div class="form-container" style="max-width: 800px; margin: 2rem auto;">
+    <h2>Active Methods</h2>
+    <h3>// Zambian</h3>
+    <table class="team-table">
+        {% for method in zambian_methods %}
+        <tr>
+            <td><strong>{{ method.method_name }}</strong>: {{ method.details }}</td>
+            <td>
+                <form action="{{ url_for('admin_delete_payment', id=method.id) }}" method="post">
+                    <button type="submit" class="button button-delete">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h3 style="margin-top: 2rem;">// International</h3>
+    <table class="team-table">
+        {% for method in international_methods %}
+        <tr>
+            <td><strong>{{ method.method_name }}</strong>: {{ method.details }}</td>
+            <td>
+                <form action="{{ url_for('admin_delete_payment', id=method.id) }}" method="post">
+                    <button type="submit" class="button button-delete">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

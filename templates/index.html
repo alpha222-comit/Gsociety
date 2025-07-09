@@ -1,37 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Genesis | Home</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>👁️‍🗨️ Genesis</h1>
-        <h2>The Beginner of Judgment</h2>
-        <div class="youtube-promo">
-            <p>🎬 Check out my tutorials and projects on YouTube!</p>
-            <a href="http://www.youtube.com/@jameschandamapipo" target="_blank">
-                <img src="{{ url_for('static', filename='ytbanner.png') }}" alt="Visit YouTube Channel" style="max-width: 100%; border: 2px solid #00ff00;">
-            </a>
-        </div>
-        
-        <p>Programmer | Hacker in Training | Software Destroyer & Repairer | Web Designer | YouTuber</p>
-        <nav>
-            <a href="/">Home</a>
-            <a href="/about">About</a>
-            <a href="/services">Services</a>
-            <a href="/projects">Projects</a>
-            <a href="/contact">Contact</a>
-            <a href="/skills">My Skills</a>
-            <a href="/terminal">Genesis Terminal</a>
-            <a href="/tools">Genesis Arsenal</a>
-            <a href="/portfolio">Portfolio</a>
-            <a href="/blog">Blog</a>
-
-            <a href="http://www.youtube.com/@jameschandamapipo" target="_blank">YouTube 🎥</a>
-        </nav>
-       
-    </div>
-    <script src="{{ url_for('static', filename='matrix.js') }}"></script>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="terminal-header">Welcome to the Genesis Network</div>
+<div class="terminal-body">
+  <p class="scanline">> System Initializing... DONE</p>
+  <p class="scanline">> Loading Core Modules... DONE</p>
+  <p class="scanline">> Status: <span class="highlight">ONLINE</span></p>
+  <br>
+  <p>// We are the architects of the new digital frontier.</p>
+  <p>// A collective of hackers, coders, and creators.</p>
+  <p>// Our mission: To build, to break, to innovate.</p>
+  <br>
+  <p class="highlight">// Explore our network using the navigation above.</p>
+</div>
+{% endblock %}

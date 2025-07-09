@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}The Genesis Society{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="main-container">
+    <header>
+      <div class="logo">GENESIS</div>
+      <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('blog') }}">Blog</a>
+        <a href="{{ url_for('team') }}">Team</a>
+        <a href="{{ url_for('terminal') }}">Terminal</a>
+        <a href="{{ url_for('gbj') }}">GBJ_AI</a>
+        <a href="{{ url_for('q_and_a') }}">Q&A</a>
+        <a href="{{ url_for('services') }}">Services</a>
+        <a href="{{ url_for('support') }}">⚡ Support</a> {# <-- NEW LINK #}
+        <a href="{{ url_for('login') }}">Admin</a>
+      </nav>
+    </header>
+
+    <main class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+      <p>© {{ now.year }} The Genesis Society // Hack the Planet</p>
+    </footer>
+  </div>
+</body>
+</html>

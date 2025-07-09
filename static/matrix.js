@@ -1,39 +1,39 @@
-// Matrix effect
-const canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
-const ctx = canvas.getContext('2d');
+window.addEventListener('load', () => {
+  const canvas = document.getElementById("matrix");
+  const ctx = canvas.getContext("2d");
+  let width = canvas.width = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
 
-canvas.style.position = 'fixed';
-canvas.style.top = 0;
-canvas.style.left = 0;
-canvas.style.zIndex = '-1';
-canvas.style.opacity = 0.3;
+  const letters = "01█▓▒░";
+  const fontSize = 16;
+  const columns = Math.floor(width / fontSize);
+  const drops = new Array(columns).fill(1);
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+  function draw() {
+    ctx.fillStyle = "rgba(0,0,0,0.05)";
+    ctx.fillRect(0, 0, width, height);
 
-const chars = '01';
-const fontSize = 14;
-const columns = canvas.width / fontSize;
-const drops = Array(Math.floor(columns)).fill(1);
-
-function draw() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#00FF00';
-    ctx.font = fontSize + 'px monospace';
+    ctx.fillStyle = "#00ff00";
+    ctx.font = fontSize + "px monospace";
 
     for (let i = 0; i < drops.length; i++) {
-        const text = chars[Math.floor(Math.random() * chars.length)];
-        const x = i * fontSize;
-        const y = drops[i] * fontSize;
-        ctx.fillText(text, x, y);
+      const char = letters.charAt(Math.floor(Math.random() * letters.length));
+      const x = i * fontSize;
+      const y = drops[i] * fontSize;
 
-        if (y > canvas.height && Math.random() > 0.975) {
-            drops[i] = 0;
-        }
-        drops[i]++;
+      ctx.fillText(char, x, y);
+
+      if (y > height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
     }
-}
+  }
 
-setInterval(draw, 33);
+  setInterval(draw, 35);
+
+  window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  });
+});

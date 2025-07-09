@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}GBJ AI Interface{% endblock %}
+
+{% block content %}
+<div id="gbj-chat">
+    <div id="gbj-output">
+        <div class="gbj-line"><span class="gbj-prompt">GBJ:</span> System active. I am Genesis Bionic Judge. How may I assist you?</div>
+    </div>
+    <div class="input-line">
+        <span class="prompt">User:</span>
+        <input type="text" id="gbj-input" autofocus autocomplete="off">
+    </div>
+</div>
+
+<script>
+    const gbjOutputDiv = document.getElementById('gbj-output');
+    const gbjInputElem = document.getElementById('gbj-input');
+
+    gbjInputElem.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') {
+            const message = gbjInputElem.value.trim();
+            if (!message) return;
+
+            // Display user message
+            gbjOutputDiv.innerHTML += `<div class="gbj-line"><span class="prompt">User:</span> ${message}</div>`;
+            gbjInputElem.value = '';
+
+            // Display "thinking" message
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'gbj-line';
+            thinkingDiv.innerHTML = `<span class="gbj-prompt">GBJ:</span> <span class="typing">...</span>`;
+            gbjOutputDiv.appendChild(thinkingDiv);
+            gbjOutputDiv.scrollTop = gbjOutputDiv.scrollHeight;
+
+            // Fetch response
+            const response = await fetch("{{ url_for('api_gbj') }}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+            const data = await response.json();
+
+            // Replace thinking message with actual response
+            thinkingDiv.innerHTML = `<span class="gbj-prompt">GBJ:</span> ${data.response}`;
+            gbjOutputDiv.scrollTop = gbjOutputDiv.scrollHeight;
+        }
+    });
+</script>
+
+<style>
+/* Add to style.css */
+.gbj-line {
+    margin-bottom: 0.5rem;
+}
+.gbj-prompt {
+    color: var(--highlight-color);
+}
+.typing {
+    display: inline-block;
+    animation: blink 1s step-end infinite;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Blog Post{% endblock %}
+
+{% block content %}
+<h1 class="glow">📤 Upload Blog Post</h1>
+<form method="POST" enctype="multipart/form-data">
+  <input name="title" placeholder="Title" required><br>
+  <textarea name="content" placeholder="Post content..." required></textarea><br>
+  <input type="file" name="file" accept=".png,.jpg,.jpeg,.gif,.mp4,.mp3,.pdf"><br>
+  <button type="submit">Upload</button>
+</form>
+<a href="{{ url_for('admin_panel') }}">← Back to Admin Panel</a>
+{% endblock %}

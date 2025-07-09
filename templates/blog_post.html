@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="post-container">
+  <h1 class="post-title">{{ post.title }}</h1>
+  <p class="post-meta">Posted on {{ post.date_posted.strftime('%Y-%m-%d %H:%M:%S') }} UTC</p>
+
+  {% if post.media_type %}
+  <div class="post-media">
+    {# --- IMAGE --- #}
+    {% if post.media_type == 'image' %}
+      <img src="{{ url_for('static', filename=post.file_path) }}" alt="{{ post.title }}">
+    
+    {# --- VIDEO --- #}
+    {% elif post.media_type == 'video' %}
+      <video controls preload="metadata" style="width:100%;">
+        <source src="{{ url_for('static', filename=post.file_path) }}" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    
+    {# --- AUDIO --- #}
+    {% elif post.media_type == 'audio' %}
+      <audio controls preload="metadata" style="width:100%;">
+        <source src="{{ url_for('static', filename=post.file_path) }}" type="audio/mpeg">
+        Your browser does not support the audio tag.
+      </audio>
+      
+    {# --- PDF --- #}
+    {% elif post.media_type == 'pdf' %}
+      <div class="pdf-container">
+        <a href="{{ url_for('static', filename=post.file_path) }}" target="_blank" class="button">Download PDF</a>
+        <embed src="{{ url_for('static', filename=post.file_path) }}" type="application/pdf" width="100%" height="500px" />
+      </div>
+      
+    {# --- YOUTUBE --- #}
+    {% elif post.media_type == 'youtube' and post.youtube_url %}
+      <div class="youtube-container">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/{{ post.youtube_url.split('v=')[-1].split('&')[0] }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="post-content">
+    {# The 'safe' filter is important if your content contains HTML #}
+    {{ post.content | safe }}
+  </div>
+
+  <a href="{{ url_for('blog') }}" class="back-link"><< Back to Blog Index</a>
+</div>
+{% endblock %}

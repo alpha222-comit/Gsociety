@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Comm-Link Q&A{% endblock %}
+{% block content %}
+<div class="terminal-header">Genesis Comm-Link [Public Q&A]</div>
+<div class="terminal-body">
+    <p>> Submit your technical questions. The Genesis Team will respond to select inquiries.</p>
+    
+    <div class="form-container" style="margin: 2rem 0;">
+        <form method="POST" class="form-group">
+            <label for="username">Your Handle:</label>
+            <input type="text" id="username" name="username" required placeholder="Anonymous">
+            
+            <label for="question">Your Question:</label>
+            <textarea id="question" name="question" rows="4" required></textarea>
+            
+            <button type="submit" class="button">Submit Transmission</button>
+        </form>
+    </div>
+</div>
+
+<div class="qa-feed">
+    {% for item in questions %}
+    <div class="qa-item">
+        <div class="qa-question">
+            <p><span class="prompt">{{ item.username }} asked:</span> {{ item.question }}</p>
+            <small>{{ item.date_asked.strftime('%Y-%m-%d') }}</small>
+        </div>
+        <div class="qa-answer">
+            <p><span class="highlight">Genesis Team replied:</span> {{ item.answer }}</p>
+            <small>{{ item.date_answered.strftime('%Y-%m-%d') }}</small>
+        </div>
+    </div>
+    {% else %}
+    <div class="qa-item">
+        <p>// Comm-Link is clear. No transmissions to display.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.qa-feed { margin-top: 2rem; }
+.qa-item { border: 1px solid var(--border-color); margin-bottom: 2rem; }
+.qa-question { padding: 1rem; border-bottom: 1px dashed var(--border-color); }
+.qa-question small { color: #888; text-shadow: none; }
+.qa-answer { padding: 1rem; background: rgba(0, 255, 65, 0.05); }
+.qa-answer small { color: #888; text-shadow: none; }
+</style>
+{% endblock %}

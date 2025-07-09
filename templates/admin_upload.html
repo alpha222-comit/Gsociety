@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Upload to Terminal - Genesis{% endblock %}
+
+{% block content %}
+<h1>📁 Upload to Terminal</h1>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul style="color: lime;">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<form action="{{ url_for('upload_terminal') }}" method="post" enctype="multipart/form-data">
+  <label>Title:</label>
+  <input type="text" name="title" required>
+
+  <label>Description:</label>
+  <textarea name="description" rows="4"></textarea>
+
+  <label>Uploader Name:</label>
+  <input type="text" name="uploader" required>
+
+  <label>Upload File:</label>
+  <input type="file" name="file" required>
+
+  <button type="submit">Upload</button>
+</form>
+
+<br>
+<a href="{{ url_for('admin_panel') }}">← Back to Admin Panel</a>
+{% endblock %}

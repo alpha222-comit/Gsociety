@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Support the Network{% endblock %}
+
+{% block content %}
+<div class="terminal-header">// SUPPORT THE GENESIS NETWORK</div>
+<div class="terminal-body">
+  <p>> Your contribution keeps our servers online, funds tool development, and fuels our mission to explore the digital frontier.</p>
+  
+  <hr style="border-color: var(--border-color); margin: 2rem 0;">
+
+  <!-- ZAMBIAN METHODS (DYNAMIC) -->
+  <h2>// For Supporters in Zambia (ZMW)</h2>
+  {% if zambian_methods %}
+    {% for method in zambian_methods %}
+      <div class="support-item">
+        <h3>{{ method.method_name }}</h3>
+        <div class="address-box">
+          <pre id="detail-{{ method.id }}">{{ method.details }}</pre>
+          <button class="button-copy" onclick="copyAddress('detail-{{ method.id }}', this)">Copy Details</button>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>// No local payment methods are currently active.</p>
+  {% endif %}
+
+  <hr style="border-color: var(--border-color); margin: 2rem 0;">
+  
+  <!-- INTERNATIONAL METHODS (DYNAMIC) -->
+  <h2>// For International Supporters</h2>
+  {% if international_methods %}
+    {% for method in international_methods %}
+      <div class="support-item">
+        <h3>{{ method.method_name }}</h3>
+        <div class="address-box">
+          <pre id="detail-{{ method.id }}">{{ method.details }}</pre>
+          <button class="button-copy" onclick="copyAddress('detail-{{ method.id }}', this)">Copy Details</button>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>// No international payment methods are currently active.</p>
+  {% endif %}
+
+</div>
+
+<script>
+function copyAddress(elementId, buttonElement) {
+  const address = document.getElementById(elementId).innerText;
+  navigator.clipboard.writeText(address).then(() => {
+    const originalText = buttonElement.innerText;
+    buttonElement.innerText = 'Copied!';
+    buttonElement.disabled = true;
+    setTimeout(() => {
+      buttonElement.innerText = originalText;
+      buttonElement.disabled = false;
+    }, 2000);
+  }).catch(err => console.error('Failed to copy: ', err));
+}
+</script>
+
+<style>
+.support-item { margin-bottom: 2rem; }
+.support-item h3 { color: var(--highlight-color); }
+.address-box {
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(0,0,0,0.5); border: 1px solid var(--border-color);
+  padding: 1rem; margin-top: 0.5rem;
+}
+.address-box pre {
+  flex-grow: 1; text-align: left; word-break: break-all;
+  white-space: pre-wrap; color: var(--text-color);
+}
+/* ... other styles remain the same ... */
+</style>
+{% endblock %}

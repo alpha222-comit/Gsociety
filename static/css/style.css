@@ -1,125 +1,208 @@
-body {
-    background-color: #0f0f0f;
-    color: #00ffcc;
-    font-family: "Courier New", monospace;
-    margin: 0;
-    padding: 20px;
+/* static/css/style.css */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+:root {
+    --main-bg: #0a0a0a;
+    --text-color: #00ff41;
+    --highlight-color: #00ffff;
+    --border-color: rgba(0, 255, 65, 0.3);
+    --font-stack: 'VT323', monospace;
 }
 
-.container {
-    text-align: center;
-    margin-top: 50px;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--main-bg);
+    color: var(--text-color);
+    font-family: var(--font-stack);
+    font-size: 1.2rem;
+    text-shadow: 0 0 5px var(--text-color);
+    line-height: 1.6;
+    background-image:
+        repeating-linear-gradient(
+            rgba(0,0,0,0.5) 0 1px,
+            transparent 1px 100%
+        ),
+        repeating-linear-gradient(
+            90deg,
+            rgba(0, 255, 65, 0.05) 0 1px,
+            transparent 1px 100%
+        );
+    background-size: 100% 2px, 3px 100%;
+}
+
+.main-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    min-height: 100vh;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.logo {
+    font-size: 2.5rem;
+    color: var(--highlight-color);
+    text-shadow: 0 0 10px var(--highlight-color);
 }
 
 nav a {
-    color: #00ffcc;
-    margin: 0 15px;
+    color: var(--text-color);
     text-decoration: none;
-    font-weight: bold;
+    margin-left: 1.5rem;
+    transition: all 0.2s;
 }
 
 nav a:hover {
-    text-shadow: 0 0 10px #00ffcc;
+    color: var(--highlight-color);
+    text-shadow: 0 0 8px var(--highlight-color);
 }
-.skills-container {
+
+.content {
+    animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* TERMINAL & INTERACTIVE ELEMENTS */
+.terminal-header {
+    background: var(--border-color);
+    padding: 0.5rem 1rem;
+    font-size: 1.5rem;
+}
+
+.terminal-body, #terminal, #gbj-chat {
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    min-height: 300px;
+}
+
+.highlight {
+    color: var(--highlight-color);
+}
+
+.prompt {
+    color: var(--highlight-color);
+}
+
+.input-line {
+    display: flex;
+}
+
+input[type="text"], input[type="password"], textarea {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-family: var(--font-stack);
+    font-size: 1.2rem;
+    flex-grow: 1;
+    outline: none;
+    text-shadow: 0 0 5px var(--text-color);
+}
+
+input[type="text"]::after {
+    content: '_';
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+pre.terminal-response {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #ccc;
+    text-shadow: none;
+}
+
+/* FORMS */
+.form-group {
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input, .form-group textarea {
     width: 100%;
-    max-width: 600px;
-    margin: 20px auto;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
 }
 
-.skill {
-    margin: 15px 0;
-}
-
-.bar-bg {
-    width: 100%;
-    height: 20px;
-    background: #111;
-    border: 1px solid #00ff00;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #00ff00, #00ffff);
-    width: 0;
-    animation: fillBar 2s ease-out forwards;
-}
-
-@keyframes fillBar {
-    from { width: 0; }
-    to { width: 100%; }
-}
-form {
-    max-width: 600px;
-    margin: 20px auto;
-    background-color: #111;
-    padding: 20px;
-    border: 1px solid #00ff00;
-    border-radius: 10px;
-}
-
-input, textarea {
-    width: 100%;
-    background-color: #000;
-    color: #00ff00;
-    border: 1px solid #00ff00;
-    padding: 10px;
-    font-family: monospace;
-}
-
-button {
-    background-color: #000;
-    color: #00ff00;
-    border: 1px solid #00ff00;
-    padding: 10px 20px;
+.button, button {
+    background: transparent;
+    border: 1px solid var(--highlight-color);
+    color: var(--highlight-color);
+    padding: 0.5rem 1.5rem;
+    font-family: var(--font-stack);
+    font-size: 1.2rem;
     cursor: pointer;
+    text-shadow: 0 0 5px var(--highlight-color);
+    transition: all 0.2s;
+}
+.button:hover, button:hover {
+    background: var(--highlight-color);
+    color: var(--main-bg);
 }
 
-button:hover {
-    background-color: #00ff00;
-    color: #000;
+/* BLOG POSTS */
+.post-container {
+    border: 1px solid var(--border-color);
+    padding: 2rem;
 }
-/* Mobile responsiveness */
-@media screen and (max-width: 768px) {
-    body {
-        padding: 10px;
-        font-size: 16px;
-    }
 
-    .container {
-        margin-top: 20px;
-    }
+.post-title {
+    color: var(--highlight-color);
+    margin-bottom: 0.5rem;
+}
 
-    nav {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+.post-meta {
+    font-size: 1rem;
+    color: #888;
+    text-shadow: none;
+    margin-bottom: 2rem;
+}
+.post-media { margin-bottom: 2rem; }
+.post-media img, .post-media video { max-width: 100%; border: 1px solid var(--border-color); }
+.youtube-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; }
+.youtube-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-    nav a {
-        margin: 10px 0;
-        font-size: 18px;
-    }
+.flash {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid;
+}
+.flash-success { border-color: var(--text-color); }
+.flash-error { border-color: #ff003c; color: #ff003c; }
+.flash-info { border-color: var(--highlight-color); color: var(--highlight-color); }
 
-    input, textarea, button {
-        font-size: 16px;
-    }
-
-    .skills-container {
-        width: 100%;
-        padding: 0 10px;
-    }
-
-    .projects, .card, form {
-        width: 100%;
-        padding: 0 10px;
-        box-sizing: border-box;
-    }
-
-    .youtube-promo img {
-        width: 100%;
-        height: auto;
-    }
+footer {
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+    margin-top: 2rem;
+    color: #888;
+    text-shadow: none;
 }

@@ -1,38 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Genesis | Change Admin Credentials</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <h1>🔐 Change Admin Credentials</h1>
+{% extends "base.html" %}
+{% block title %}Change Admin Password{% endblock %}
 
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul style="color: lime;">
-          {% for message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+{% block content %}
+<h1>🔐 Change Admin Credentials</h1>
 
-    <form method="POST">
-        <label>Old Username:</label>
-        <input type="text" name="old_username" required><br><br>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul>
+    {% for category, message in messages %}
+      <li style="color:lime;">{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 
-        <label>Old Password:</label>
-        <input type="password" name="old_password" required><br><br>
+<form method="post">
+    <input type="password" name="old_password" placeholder="Old Password" required>
+    <input type="password" name="new_password" placeholder="New Password" required>
+    <button type="submit">Update Password</button>
+</form>
 
-        <label>New Username:</label>
-        <input type="text" name="new_username" required><br><br>
-
-        <label>New Password:</label>
-        <input type="password" name="new_password" required><br><br>
-
-        <button type="submit">Update Credentials</button>
-    </form>
-
-    <a href="/dashboard">🔙 Back to Dashboard</a>
-</body>
-</html>
+<a href="{{ url_for('admin_panel') }}">🔙 Back to Admin Panel</a>
+{% endblock %}

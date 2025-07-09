@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Change Admin Credentials - Genesis{% endblock %}
+
+{% block content %}
+<h1>🔐 Change Admin Password</h1>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul style="color: lime;">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<form action="{{ url_for('change_credentials') }}" method="post">
+  <label>Old Password:</label>
+  <input type="password" name="old_password" required>
+
+  <label>New Password:</label>
+  <input type="password" name="new_password" required>
+
+  <label>Confirm New Password:</label>
+  <input type="password" name="confirm_password" required>
+
+  <button type="submit">🔄 Update Password</button>
+</form>
+
+<br>
+<a href="{{ url_for('admin_panel') }}">← Back to Admin Panel</a>
+{% endblock %}

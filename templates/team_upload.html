@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Team Profile{% endblock %}
+
+{% block content %}
+<h1 class="glow">👥 Upload Team Profile</h1>
+<form method="POST" enctype="multipart/form-data">
+  <input name="name" placeholder="Name" required><br>
+  <input name="role" placeholder="Role" required><br>
+  <input type="file" name="image" accept="image/*" required><br>
+  <button type="submit">Upload</button>
+</form>
+<a href="{{ url_for('admin_panel') }}">← Back to Admin Panel</a>
+{% endblock %}

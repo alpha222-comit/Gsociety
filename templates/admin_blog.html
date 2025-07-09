@@ -1,36 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Manage Blog</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <h1>Manage Blog Posts</h1>
-
-    <form method="POST">
-        <label>Title:</label><br>
-        <input type="text" name="title" required><br><br>
-
-        <label>Content:</label><br>
-        <textarea name="content" rows="4" required></textarea><br><br>
-
-        <button type="submit">Add Post</button>
+{% extends "base.html" %}
+{% block title %}Manage Blog{% endblock %}
+{% block content %}
+<div class="form-container" style="max-width: 800px;">
+    <div class="terminal-header">Blog Management</div>
+    <form method="POST" enctype="multipart/form-data" class="form-group">
+        <h2>Create New Transmission</h2>
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required>
+        <label for="content">Content (HTML is allowed):</label>
+        <textarea id="content" name="content" rows="10" required></textarea>
+        <hr style="border-color: var(--border-color); margin: 2rem 0;">
+        <label>Media Attachment (Optional):</label>
+        <p style="font-size: 1rem; color: #888;">// Upload a file OR provide a YouTube link. YouTube takes priority.</p>
+        <label for="file">Upload File (Image, PDF, MP3, MP4):</label>
+        <input type="file" id="file" name="file" class="file-input">
+        <label for="youtube_url">Or YouTube Video URL:</label>
+        <input type="text" id="youtube_url" name="youtube_url" placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+        <button type="submit" class="button" style="margin-top: 1rem;">Publish</button>
     </form>
-
-    <hr>
-
-    <h2>All Posts</h2>
-    <ul>
+</div>
+<div class="existing-posts" style="max-width: 800px; margin: 2rem auto;">
+    <h2>Existing Transmissions</h2>
+    <ul class="post-list">
         {% for post in posts %}
-        <li>
-            <strong>{{ post.title }}</strong><br>
-            <p>{{ post.content }}</p>
-            <a href="/admin/delete/{{ loop.index0 }}">Delete</a>
-        </li>
-        <hr>
+            <li>
+                <span class="post-date">[{{ post.date_posted.strftime('%Y-%m-%d') }}]</span>
+                <a href="{{ url_for('blog_post', post_id=post.id) }}">{{ post.title }}</a>
+            </li>
+        {% else %}
+            <li>// No transmissions logged.</li>
         {% endfor %}
     </ul>
-
-    <a href="/dashboard">Back to Dashboard</a>
-</body>
-</html>
+</div>
+<style>
+.existing-posts { margin-top: 3rem; border: 1px solid var(--border-color); padding: 1.5rem; }
+.file-input { border: none; padding-left: 0; }
+</style>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Moderate Comments - Genesis{% endblock %}
+
+{% block content %}
+<h1>💬 Moderate Blog Comments</h1>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul style="color: lime;">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+{% if comments %}
+  <ul>
+    {% for comment in comments %}
+      <li>
+        <strong>{{ comment.username }}</strong> on Post {{ comment.post_id }}:<br>
+        {{ comment.comment }} <br>
+        <form action="{{ url_for('approve_comment', comment_id=comment.id) }}" method="post" style="display:inline;">
+          <button type="submit">✅ Approve</button>
+        </form>
+        <form action="{{ url_for('delete_comment', comment_id=comment.id) }}" method="post" style="display:inline;">
+          <button type="submit">🗑️ Delete</button>
+        </form>
+      </li>
+      <hr>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No pending comments to moderate.</p>
+{% endif %}
+
+<br>
+<a href="{{ url_for('admin_panel') }}">← Back to Admin Panel</a>
+{% endblock %}

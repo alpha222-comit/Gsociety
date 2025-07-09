@@ -1,30 +1,41 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Upload Team Member</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>👨‍💻 Add Team Member</h1>
-
-        <form method="POST" enctype="multipart/form-data">
-            <label>Name:</label>
-            <input type="text" name="name" required>
-
-            <label>Role:</label>
-            <input type="text" name="role" required>
-
-            <label>Bio (optional):</label>
-            <textarea name="bio"></textarea>
-
-            <label>Image (JPG/PNG):</label>
-            <input type="file" name="image">
-
-            <button type="submit">Upload</button>
-        </form>
-
-        <a href="/dashboard">Back to Admin Dashboard</a>
+{% extends "base.html" %}
+{% block title %}Manage Team{% endblock %}
+{% block content %}
+<div class="form-container">
+    <div class="terminal-header">Manage Team Roster</div>
+    <form method="POST" class="form-group">
+        <h2>Add New Operative</h2>
+        <label for="name">Handle:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="role">Designation:</label>
+        <input type="text" id="role" name="role" required>
+        <button type="submit" class="button">Add to Roster</button>
+    </form>
+    <div class="existing-posts" style="margin-top: 2rem;">
+        <h2>Current Roster</h2>
+        <table class="team-table">
+            <thead><tr><th>Handle</th><th>Designation</th><th>Action</th></tr></thead>
+            <tbody>
+                {% for member in team_members %}
+                <tr>
+                    <td>{{ member.name }}</td>
+                    <td>{{ member.role }}</td>
+                    <td>
+                        <form action="{{ url_for('admin_delete_team_member', id=member.id) }}" method="post">
+                            <button type="submit" class="button button-delete">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3">// Roster is empty.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-</body>
-</html>
+     <a href="{{ url_for('admin_dashboard') }}" class="back-link" style="margin-top: 1rem; display: inline-block;"><< Back to Dashboard</a>
+</div>
+<style>
+.button-delete { border-color: #ff003c; color: #ff003c; text-shadow: 0 0 5px #ff003c; }
+.button-delete:hover { background: #ff003c; color: var(--main-bg); }
+</style>
+{% endblock %}

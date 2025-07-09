@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Manage Q&A{% endblock %}
+{% block content %}
+<div class="terminal-header">Manage Comm-Link</div>
+
+<div class="form-container" style="max-width: 800px; margin: 2rem auto;">
+    <h2>Unanswered Questions</h2>
+    {% for item in unanswered %}
+    <div class="qa-admin-item">
+        <p><strong>From:</strong> {{ item.username }} | <strong>Asked:</strong> {{ item.date_asked.strftime('%Y-%m-%d') }}</p>
+        <p><strong>Question:</strong> {{ item.question }}</p>
+        <form action="{{ url_for('admin_answer_question', id=item.id) }}" method="post" class="form-group">
+            <label for="answer-{{item.id}}">Your Answer:</label>
+            <textarea id="answer-{{item.id}}" name="answer" rows="4" required></textarea>
+            <button type="submit" class="button">Publish Answer</button>
+        </form>
+        <form action="{{ url_for('admin_delete_question', id=item.id) }}" method="post" style="display: inline-block; margin-left: 1rem;">
+             <button type="submit" class="button button-delete">Delete</button>
+        </form>
+    </div>
+    {% else %}
+    <p>// No pending questions.</p>
+    {% endfor %}
+</div>
+
+<div class="form-container" style="max-width: 800px; margin: 2rem auto;">
+    <h2>Recently Answered</h2>
+    {% for item in answered %}
+    <div class="qa-admin-item answered">
+        <p><strong>Question:</strong> {{ item.question }}</p>
+        <p><strong>Answer:</strong> {{ item.answer }}</p>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.qa-admin-item {
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+.qa-admin-item.answered {
+    border-color: rgba(0, 255, 65, 0.2);
+    background: rgba(0, 255, 65, 0.05);
+}
+</style>
+{% endblock %}

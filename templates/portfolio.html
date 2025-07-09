@@ -1,43 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Genesis | Portfolio</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <h1>📂 My Portfolio</h1>
+{% extends "base.html" %}
 
-    {% if portfolio %}
-        <div class="projects">
-            {% for item in portfolio %}
-                <div class="card">
-                    <h2>{{ item.title }}</h2>
-                    <p>{{ item.description }}</p>
+{% block title %}Upload Portfolio Item{% endblock %}
 
-                    {% if item.file.endswith('.jpg') or item.file.endswith('.png') or item.file.endswith('.jpeg') or item.file.endswith('.gif') %}
-                        <img src="{{ url_for('uploaded_file', filename=item.file) }}" alt="{{ item.title }}" style="max-width:100%;">
-                    {% elif item.file.endswith('.mp4') %}
-                        <video controls style="max-width:100%;">
-                            <source src="{{ url_for('uploaded_file', filename=item.file) }}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    {% elif item.file.endswith('.mp3') %}
-                        <audio controls>
-                            <source src="{{ url_for('uploaded_file', filename=item.file) }}" type="audio/mpeg">
-                            Your browser does not support the audio tag.
-                        </audio>
-                    {% elif item.file.endswith('.pdf') %}
-                        <p><a href="{{ url_for('uploaded_file', filename=item.file) }}" target="_blank">📄 View PDF</a></p>
-                    {% else %}
-                        <p><a href="{{ url_for('uploaded_file', filename=item.file) }}" target="_blank">📁 Download File</a></p>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p style="color: red;">No portfolio items uploaded yet.</p>
-    {% endif %}
+{% block content %}
+<h1>📁 Upload Portfolio Item</h1>
 
-    <a href="/">🔙 Back to Home</a>
-</body>
-</html>
+<form method="POST" enctype="multipart/form-data">
+  <label>Title:</label>
+  <input type="text" name="title" required><br><br>
+
+  <label>Description:</label>
+  <textarea name="description" rows="5" required></textarea><br><br>
+
+  <label>Select File:</label>
+  <input type="file" name="file" accept=".pdf,.mp3,.mp4,.png,.jpg,.jpeg,.gif" required><br><br>
+
+  <button type="submit">Upload</button>
+</form>
+
+<a href="{{ url_for('admin_panel') }}">🔙 Back to Admin Panel</a>
+{% endblock %}

@@ -1,0 +1,37 @@
+# --- Python ---
+# Ignore the virtual environment folder
+venv/
+env/
+
+# Ignore Python's cache files
+__pycache__/
+*.pyc
+
+# --- Local Database ---
+# The production server will use PostgreSQL, so we don't need the local test database
+genesis.db
+
+# --- Sensitive Files ---
+# Ignore environment variables files (good practice)
+.env
+*.env.*
+
+# --- Operating System & Editor Files ---
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# JetBrains IDEs (PyCharm, etc.)
+.idea/
+
+# --- Uploads ---
+# In a real-world scenario, you often ignore user uploads, 
+# but for Render's build cache, it's sometimes okay to include the folder structure.
+# We will leave it out of gitignore for now as our `static/uploads` is currently empty.
+# If you add test files you don't want on git, you can add this line:
+# static/uploads/

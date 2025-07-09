@@ -1,18 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Services</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <h1>My Services</h1>
-    <ul>
-        <li>System Repair</li>
-        <li>Ethical Hacking & PenTesting</li>
-        <li>Web Development</li>
-        <li>Custom Tool Creation</li>
-    </ul>
-    <a href="/">Back to Home</a>
-    <script src="{{ url_for('static', filename='matrix.js') }}"></script>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Services - Genesis Society{% endblock %}
+{% block content %}
+<div class="terminal-header">Genesis Solutions & Services</div>
+<div class="terminal-body">
+    <p>> Our operatives are available for contract work. We transform complex problems into elegant, secure solutions.</p>
+    <hr style="border-color: var(--border-color); margin: 2rem 0;">
+
+    <div class="service-item">
+        <h2 class="highlight">// Custom Web Application Development</h2>
+        <p>From sleek portfolios to complex data-driven dashboards, we build robust and secure web applications tailored to your exact specifications using Python (Flask) and modern frontend technologies.</p>
+    </div>
+
+    <div class="service-item">
+        <h2 class="highlight">// Advanced Scripting & Automation</h2>
+        <p>Automate repetitive tasks, process data, or create powerful tools. We specialize in Python scripts for web scraping, system administration, and workflow automation.</p>
+    </div>
+
+    <div class="service-item">
+        <h2 class="highlight">// Security Consultation & Code Auditing</h2>
+        <p>Strengthen your digital fortress. We provide basic security audits for web applications, identifying common vulnerabilities (XSS, SQLi, CSRF) and recommending actionable solutions.</p>
+    </div>
+
+    <div class="service-item">
+        <h2 class="highlight">// Custom Templates & Component Builds</h2>
+        <p>Need a specific "hacker-themed" template or a unique web component? We can design and build static HTML/CSS/JS templates that are clean, responsive, and ready for integration.</p>
+    </div>
+
+    <hr style="border-color: var(--border-color); margin: 2rem 0;">
+
+    <h2 class="highlight">// Initiate Contact</h2>
+    <p>To inquire about our services and receive a project quote, please contact Lord Alpha directly via email:</p>
+    <p style="font-size: 1.5rem; text-align: center; margin-top: 1rem;">
+        <a href="mailto:your_email@example.com">lord.alpha@genesis-protocol.net</a>
+    </p>
+</div>
+
+<style>
+.service-item {
+    margin-bottom: 2.5rem;
+}
+.service-item h2 {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}
