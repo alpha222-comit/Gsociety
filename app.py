@@ -1,8 +1,9 @@
-# app.py (Version 8.0 - Complete Zero-Command Deployment for Render Free Tier)
+# app.py (Version 9.0 - The Production Fix with DictCursor)
 
 import os
 import sqlite3
 import psycopg2
+from psycopg2.extras import DictCursor # <-- CRITICAL IMPORT
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash, g, jsonify, send_from_directory
@@ -11,25 +12,22 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# --- CONFIGURATION (Handles Both Local and Production) ---
+# --- CONFIGURATION ---
 IS_PRODUCTION = os.environ.get('IS_PRODUCTION', 'False').lower() == 'true'
 
 if IS_PRODUCTION:
-    # Production settings (from Render environment variables)
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
     DATABASE_URL = os.environ.get('DATABASE_URL')
-    app.config['UPLOAD_FOLDER'] = '/tmp/uploads' # A temporary, non-persistent directory
+    app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 else:
-    # Local development settings
     app.config['SECRET_KEY'] = 'dev-secret'
     app.config['DATABASE'] = 'genesis.db'
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'mp3', 'mp4'}
-# We only create the directory locally, not needed in stateless production
 if not IS_PRODUCTION:
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'mp3', 'mp4'}
 
 # --- DATABASE HELPERS ---
 def get_db():
@@ -41,6 +39,14 @@ def get_db():
             g.db.row_factory = sqlite3.Row
     return g.db
 
+def get_cursor():
+    """Gets a database cursor that returns dictionary-like rows for both environments."""
+    db = get_db()
+    if IS_PRODUCTION:
+        return db.cursor(cursor_factory=DictCursor)
+    else:
+        return db.cursor()
+
 @app.teardown_appcontext
 def close_db(e=None):
     db = g.pop('db', None)
@@ -49,64 +55,43 @@ def close_db(e=None):
 
 def init_db():
     db = get_db()
-    cursor = db.cursor()
+    cursor = get_cursor()
     tables = ['users', 'blog', 'team', 'terminal_files', 'qa_board', 'payment_methods']
     for table in tables:
         cursor.execute(f"DROP TABLE IF EXISTS {table} CASCADE;")
 
-    if IS_PRODUCTION:
-        # PostgreSQL schema
-        cursor.execute("""CREATE TABLE users (id SERIAL PRIMARY KEY, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL);""")
-        cursor.execute("""CREATE TABLE blog (id SERIAL PRIMARY KEY, title TEXT NOT NULL, content TEXT NOT NULL, date_posted TIMESTAMP NOT NULL, media_type TEXT, file_path TEXT, youtube_url TEXT);""")
-        cursor.execute("""CREATE TABLE team (id SERIAL PRIMARY KEY, name TEXT NOT NULL, role TEXT NOT NULL);""")
-        cursor.execute("""CREATE TABLE terminal_files (id SERIAL PRIMARY KEY, filename TEXT NOT NULL, description TEXT NOT NULL);""")
-        cursor.execute("""CREATE TABLE qa_board (id SERIAL PRIMARY KEY, username TEXT NOT NULL, question TEXT NOT NULL, answer TEXT, date_asked TIMESTAMP NOT NULL, date_answered TIMESTAMP, is_answered INTEGER NOT NULL DEFAULT 0);""")
-        cursor.execute("""CREATE TABLE payment_methods (id SERIAL PRIMARY KEY, method_name TEXT NOT NULL, details TEXT NOT NULL, category TEXT NOT NULL);""")
-        
-        # Use %s for placeholders
-        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s);", ('admin', generate_password_hash('password')))
-        cursor.execute("INSERT INTO team (name, role) VALUES (%s, %s);", ('Lord Alpha', 'Founder & Lead Architect'))
-        cursor.execute("INSERT INTO payment_methods (method_name, details, category) VALUES (%s, %s, %s);", ('PayPal', 'your.email@example.com', 'International'))
-    else:
-        # SQLite schema
-        cursor.execute("""CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL);""")
-        cursor.execute("""CREATE TABLE blog (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, content TEXT NOT NULL, date_posted TIMESTAMP NOT NULL, media_type TEXT, file_path TEXT, youtube_url TEXT);""")
-        cursor.execute("""CREATE TABLE team (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, role TEXT NOT NULL);""")
-        cursor.execute("""CREATE TABLE terminal_files (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT NOT NULL, description TEXT NOT NULL);""")
-        cursor.execute("""CREATE TABLE qa_board (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, question TEXT NOT NULL, answer TEXT, date_asked TIMESTAMP NOT NULL, date_answered TIMESTAMP, is_answered INTEGER NOT NULL DEFAULT 0);""")
-        cursor.execute("""CREATE TABLE payment_methods (id INTEGER PRIMARY KEY AUTOINCREMENT, method_name TEXT NOT NULL, details TEXT NOT NULL, category TEXT NOT NULL CHECK(category IN ('Zambian', 'International')));""")
-        
-        # Use ? for placeholders
-        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?);", ('admin', generate_password_hash('password')))
-        cursor.execute("INSERT INTO team (name, role) VALUES (?, ?);", ('Lord Alpha', 'Founder & Lead Architect'))
-        cursor.execute("INSERT INTO payment_methods (method_name, details, category) VALUES (?, ?, ?);", ('PayPal', 'your.email@example.com', 'International'))
-            
+    # Use SERIAL PRIMARY KEY for PostgreSQL, INTEGER PRIMARY KEY AUTOINCREMENT for SQLite
+    id_type = "SERIAL PRIMARY KEY" if IS_PRODUCTION else "INTEGER PRIMARY KEY AUTOINCREMENT"
+    
+    cursor.execute(f"""CREATE TABLE users (id {id_type}, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL);""")
+    cursor.execute(f"""CREATE TABLE blog (id {id_type}, title TEXT NOT NULL, content TEXT NOT NULL, date_posted TIMESTAMP NOT NULL, media_type TEXT, file_path TEXT, youtube_url TEXT);""")
+    cursor.execute(f"""CREATE TABLE team (id {id_type}, name TEXT NOT NULL, role TEXT NOT NULL);""")
+    cursor.execute(f"""CREATE TABLE terminal_files (id {id_type}, filename TEXT NOT NULL, description TEXT NOT NULL);""")
+    cursor.execute(f"""CREATE TABLE qa_board (id {id_type}, username TEXT NOT NULL, question TEXT NOT NULL, answer TEXT, date_asked TIMESTAMP NOT NULL, date_answered TIMESTAMP, is_answered INTEGER NOT NULL DEFAULT 0);""")
+    cursor.execute(f"""CREATE TABLE payment_methods (id {id_type}, method_name TEXT NOT NULL, details TEXT NOT NULL, category TEXT NOT NULL);""")
+    
+    # Pre-populate data
+    query = "INSERT INTO users (username, password) VALUES (%s, %s);" if IS_PRODUCTION else "INSERT INTO users (username, password) VALUES (?, ?);"
+    cursor.execute(query, ('admin', generate_password_hash('password')))
+    
     db.commit()
     print("Database has been initialized.")
 
-# =========================================================
-# === NEW ONE-TIME INITIALIZATION ROUTE ===
-# This flag prevents the route from being run more than once
+# --- ONE-TIME INIT ROUTE ---
 db_initialized = False
-
 @app.route('/init-database-on-first-run')
 def one_time_init():
     global db_initialized
-    if not IS_PRODUCTION:
-        return "This route is for production use only.", 403
-    if db_initialized:
-        return "Database has already been initialized. This route is now disabled.", 403
-    
+    if not IS_PRODUCTION: return "Production use only.", 403
+    if db_initialized: return "Database already initialized.", 403
     try:
         init_db()
         db_initialized = True
-        return "SUCCESS: The database has been initialized. This route is now permanently disabled.", 200
+        return "SUCCESS: Database has been initialized.", 200
     except Exception as e:
-        return f"An error occurred during initialization: {e}", 500
-# =========================================================
+        return f"An error occurred: {e}", 500
 
-# --- ALL OTHER FUNCTIONS & ROUTES ---
-
+# --- HELPER FUNCTIONS ---
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -124,22 +109,20 @@ def login_required(f):
 def inject_now():
     return {'now': datetime.utcnow()}
 
-# --- Public Routes ---
+# --- PUBLIC ROUTES ---
 @app.route('/')
 def home(): return render_template('index.html')
 
 @app.route('/blog')
 def blog():
-    db = get_db()
-    cursor = db.cursor()
+    cursor = get_cursor()
     cursor.execute('SELECT id, title, date_posted FROM blog ORDER BY date_posted DESC')
     posts = cursor.fetchall()
     return render_template('blog.html', posts=posts)
 
 @app.route('/blog/<int:post_id>')
 def blog_post(post_id):
-    db = get_db()
-    cursor = db.cursor()
+    cursor = get_cursor()
     query = 'SELECT * FROM blog WHERE id = %s' if IS_PRODUCTION else 'SELECT * FROM blog WHERE id = ?'
     cursor.execute(query, (post_id,))
     post = cursor.fetchone()
@@ -148,8 +131,7 @@ def blog_post(post_id):
 
 @app.route('/team')
 def team():
-    db = get_db()
-    cursor = db.cursor()
+    cursor = get_cursor()
     cursor.execute('SELECT * FROM team ORDER BY id')
     members = cursor.fetchall()
     return render_template('team.html', members=members)
@@ -165,8 +147,7 @@ def services(): return render_template('services.html')
 
 @app.route('/support')
 def support():
-    db = get_db()
-    cursor = db.cursor()
+    cursor = get_cursor()
     query_z = "SELECT * FROM payment_methods WHERE category = %s" if IS_PRODUCTION else "SELECT * FROM payment_methods WHERE category = ?"
     cursor.execute(query_z, ('Zambian',))
     zambian_methods = cursor.fetchall()
@@ -178,7 +159,7 @@ def support():
 @app.route('/q-and-a', methods=['GET', 'POST'])
 def q_and_a():
     db = get_db()
-    cursor = db.cursor()
+    cursor = get_cursor()
     if request.method == 'POST':
         username = request.form['username']
         question = request.form['question']
@@ -192,24 +173,19 @@ def q_and_a():
     questions = cursor.fetchall()
     return render_template('q_and_a.html', questions=questions)
 
-# --- Admin Routes ---
+# --- ADMIN ROUTES ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        db = get_db()
-        cursor = db.cursor()
+        cursor = get_cursor()
         query = 'SELECT * FROM users WHERE username = %s' if IS_PRODUCTION else 'SELECT * FROM users WHERE username = ?'
         cursor.execute(query, (username,))
         user = cursor.fetchone()
         
-        # Handle tuple vs. dict access
-        pwd_hash = user[2] if IS_PRODUCTION else user['password']
-        user_name = user[1] if IS_PRODUCTION else user['username']
-
-        if user and check_password_hash(pwd_hash, password):
-            session['user'] = user_name
+        if user and check_password_hash(user['password'], password):
+            session['user'] = user['username']
             flash('Login successful. Welcome, admin.', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
@@ -228,9 +204,64 @@ def logout():
 def admin_dashboard():
     return render_template('admin_dashboard.html')
 
-# Other admin routes here... (The pattern is the same: check IS_PRODUCTION for SQL syntax)
-# ...
+@app.route('/admin/blog', methods=['GET', 'POST'])
+@login_required
+def admin_blog():
+    db = get_db()
+    cursor = get_cursor()
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+        youtube_url = request.form.get('youtube_url')
+        
+        media_type, file_path = None, None
+        
+        if youtube_url:
+            media_type = 'youtube'
+        elif not IS_PRODUCTION: # File uploads are only processed in local dev
+            file = request.files.get('file')
+            if file and file.filename != '' and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                file_path = f"uploads/{filename}"
+                # Set media_type based on ext
+        elif IS_PRODUCTION and request.files.get('file'):
+            flash("File uploads are disabled on the live server.", "error")
+        
+        query = 'INSERT INTO blog (title, content, date_posted, media_type, file_path, youtube_url) VALUES (%s, %s, %s, %s, %s, %s)' if IS_PRODUCTION else 'INSERT INTO blog (title, content, date_posted, media_type, file_path, youtube_url) VALUES (?, ?, ?, ?, ?, ?)'
+        cursor.execute(query, (title, content, datetime.utcnow(), media_type, file_path, youtube_url))
+        db.commit()
+        flash('New blog post has been published.', 'success')
+        return redirect(url_for('admin_blog'))
+        
+    cursor.execute('SELECT * FROM blog ORDER BY date_posted DESC')
+    posts = cursor.fetchall()
+    return render_template('admin_blog.html', posts=posts)
 
-# --- Main Execution ---
+@app.route('/admin/payments', methods=['GET', 'POST'])
+@login_required
+def admin_payments():
+    db = get_db()
+    cursor = get_cursor()
+    if request.method == 'POST':
+        method_name = request.form['method_name']
+        details = request.form['details']
+        category = request.form['category']
+        query = 'INSERT INTO payment_methods (method_name, details, category) VALUES (%s, %s, %s)' if IS_PRODUCTION else 'INSERT INTO payment_methods (method_name, details, category) VALUES (?, ?, ?)'
+        cursor.execute(query, (method_name, details, category))
+        db.commit()
+        flash(f'Payment method "{method_name}" added.', 'success')
+        return redirect(url_for('admin_payments'))
+    
+    query_z = "SELECT * FROM payment_methods WHERE category = %s" if IS_PRODUCTION else "SELECT * FROM payment_methods WHERE category = ?"
+    cursor.execute(query_z, ('Zambian',))
+    zambian_methods = cursor.fetchall()
+    query_i = "SELECT * FROM payment_methods WHERE category = %s" if IS_PRODUCTION else "SELECT * FROM payment_methods WHERE category = ?"
+    cursor.execute(query_i, ('International',))
+    international_methods = cursor.fetchall()
+    return render_template('admin_payments.html', zambian_methods=zambian_methods, international_methods=international_methods)
+
+
+# --- MAIN EXECUTION ---
 if __name__ == "__main__":
     app.run(debug=not IS_PRODUCTION)
