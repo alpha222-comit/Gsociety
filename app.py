@@ -1,9 +1,9 @@
-# app.py (Version 9.0 - The Production Fix with DictCursor)
+# app.py (Version 10.1 - Final Production Hardened with Autocommit)
 
 import os
 import sqlite3
 import psycopg2
-from psycopg2.extras import DictCursor # <-- CRITICAL IMPORT
+from psycopg2.extras import DictCursor
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash, g, jsonify, send_from_directory
@@ -34,13 +34,14 @@ def get_db():
     if 'db' not in g:
         if IS_PRODUCTION:
             g.db = psycopg2.connect(DATABASE_URL)
+            # THE DEFINITIVE FIX: AUTOCOMMIT MODE
+            g.db.autocommit = True
         else:
             g.db = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
             g.db.row_factory = sqlite3.Row
     return g.db
 
 def get_cursor():
-    """Gets a database cursor that returns dictionary-like rows for both environments."""
     db = get_db()
     if IS_PRODUCTION:
         return db.cursor(cursor_factory=DictCursor)
@@ -54,13 +55,11 @@ def close_db(e=None):
         db.close()
 
 def init_db():
-    db = get_db()
     cursor = get_cursor()
     tables = ['users', 'blog', 'team', 'terminal_files', 'qa_board', 'payment_methods']
     for table in tables:
         cursor.execute(f"DROP TABLE IF EXISTS {table} CASCADE;")
 
-    # Use SERIAL PRIMARY KEY for PostgreSQL, INTEGER PRIMARY KEY AUTOINCREMENT for SQLite
     id_type = "SERIAL PRIMARY KEY" if IS_PRODUCTION else "INTEGER PRIMARY KEY AUTOINCREMENT"
     
     cursor.execute(f"""CREATE TABLE users (id {id_type}, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL);""")
@@ -70,11 +69,9 @@ def init_db():
     cursor.execute(f"""CREATE TABLE qa_board (id {id_type}, username TEXT NOT NULL, question TEXT NOT NULL, answer TEXT, date_asked TIMESTAMP NOT NULL, date_answered TIMESTAMP, is_answered INTEGER NOT NULL DEFAULT 0);""")
     cursor.execute(f"""CREATE TABLE payment_methods (id {id_type}, method_name TEXT NOT NULL, details TEXT NOT NULL, category TEXT NOT NULL);""")
     
-    # Pre-populate data
     query = "INSERT INTO users (username, password) VALUES (%s, %s);" if IS_PRODUCTION else "INSERT INTO users (username, password) VALUES (?, ?);"
     cursor.execute(query, ('admin', generate_password_hash('password')))
     
-    db.commit()
     print("Database has been initialized.")
 
 # --- ONE-TIME INIT ROUTE ---
@@ -87,14 +84,13 @@ def one_time_init():
     try:
         init_db()
         db_initialized = True
-        return "SUCCESS: Database has been initialized.", 200
+        return "SUCCESS: The database has been initialized.", 200
     except Exception as e:
         return f"An error occurred: {e}", 500
 
 # --- HELPER FUNCTIONS ---
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def login_required(f):
     @wraps(f)
@@ -148,24 +144,21 @@ def services(): return render_template('services.html')
 @app.route('/support')
 def support():
     cursor = get_cursor()
-    query_z = "SELECT * FROM payment_methods WHERE category = %s" if IS_PRODUCTION else "SELECT * FROM payment_methods WHERE category = ?"
-    cursor.execute(query_z, ('Zambian',))
+    query = "SELECT * FROM payment_methods WHERE category = %s" if IS_PRODUCTION else "SELECT * FROM payment_methods WHERE category = ?"
+    cursor.execute(query, ('Zambian',))
     zambian_methods = cursor.fetchall()
-    query_i = "SELECT * FROM payment_methods WHERE category = %s" if IS_PRODUCTION else "SELECT * FROM payment_methods WHERE category = ?"
-    cursor.execute(query_i, ('International',))
+    cursor.execute(query, ('International',))
     international_methods = cursor.fetchall()
     return render_template('support.html', zambian_methods=zambian_methods, international_methods=international_methods)
 
 @app.route('/q-and-a', methods=['GET', 'POST'])
 def q_and_a():
-    db = get_db()
     cursor = get_cursor()
     if request.method == 'POST':
         username = request.form['username']
         question = request.form['question']
         query = 'INSERT INTO qa_board (username, question, date_asked) VALUES (%s, %s, %s)' if IS_PRODUCTION else 'INSERT INTO qa_board (username, question, date_asked) VALUES (?, ?, ?)'
         cursor.execute(query, (username, question, datetime.utcnow()))
-        db.commit()
         flash('Your question has been submitted.', 'success')
         return redirect(url_for('q_and_a'))
     
@@ -176,6 +169,8 @@ def q_and_a():
 # --- ADMIN ROUTES ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if 'user' in session:
+        return redirect(url_for('admin_dashboard'))
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -207,30 +202,28 @@ def admin_dashboard():
 @app.route('/admin/blog', methods=['GET', 'POST'])
 @login_required
 def admin_blog():
-    db = get_db()
     cursor = get_cursor()
     if request.method == 'POST':
         title = request.form['title']
         content = request.form['content']
         youtube_url = request.form.get('youtube_url')
-        
         media_type, file_path = None, None
         
         if youtube_url:
             media_type = 'youtube'
-        elif not IS_PRODUCTION: # File uploads are only processed in local dev
+        elif not IS_PRODUCTION:
             file = request.files.get('file')
             if file and file.filename != '' and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 file_path = f"uploads/{filename}"
-                # Set media_type based on ext
-        elif IS_PRODUCTION and request.files.get('file'):
+                ext = filename.rsplit('.', 1)[1].lower()
+                if ext in ['png', 'jpg', 'jpeg', 'gif']: media_type = 'image'
+        elif IS_PRODUCTION and 'file' in request.files and request.files['file'].filename != '':
             flash("File uploads are disabled on the live server.", "error")
         
         query = 'INSERT INTO blog (title, content, date_posted, media_type, file_path, youtube_url) VALUES (%s, %s, %s, %s, %s, %s)' if IS_PRODUCTION else 'INSERT INTO blog (title, content, date_posted, media_type, file_path, youtube_url) VALUES (?, ?, ?, ?, ?, ?)'
         cursor.execute(query, (title, content, datetime.utcnow(), media_type, file_path, youtube_url))
-        db.commit()
         flash('New blog post has been published.', 'success')
         return redirect(url_for('admin_blog'))
         
@@ -241,7 +234,6 @@ def admin_blog():
 @app.route('/admin/payments', methods=['GET', 'POST'])
 @login_required
 def admin_payments():
-    db = get_db()
     cursor = get_cursor()
     if request.method == 'POST':
         method_name = request.form['method_name']
@@ -249,19 +241,19 @@ def admin_payments():
         category = request.form['category']
         query = 'INSERT INTO payment_methods (method_name, details, category) VALUES (%s, %s, %s)' if IS_PRODUCTION else 'INSERT INTO payment_methods (method_name, details, category) VALUES (?, ?, ?)'
         cursor.execute(query, (method_name, details, category))
-        db.commit()
         flash(f'Payment method "{method_name}" added.', 'success')
         return redirect(url_for('admin_payments'))
     
-    query_z = "SELECT * FROM payment_methods WHERE category = %s" if IS_PRODUCTION else "SELECT * FROM payment_methods WHERE category = ?"
-    cursor.execute(query_z, ('Zambian',))
+    query = "SELECT * FROM payment_methods WHERE category = %s" if IS_PRODUCTION else "SELECT * FROM payment_methods WHERE category = ?"
+    cursor.execute(query, ('Zambian',))
     zambian_methods = cursor.fetchall()
-    query_i = "SELECT * FROM payment_methods WHERE category = %s" if IS_PRODUCTION else "SELECT * FROM payment_methods WHERE category = ?"
-    cursor.execute(query_i, ('International',))
+    cursor.execute(query, ('International',))
     international_methods = cursor.fetchall()
     return render_template('admin_payments.html', zambian_methods=zambian_methods, international_methods=international_methods)
 
+# ... other admin routes can be added here following the same pattern ...
 
-# --- MAIN EXECUTION ---
+
+# --- Main Execution ---
 if __name__ == "__main__":
     app.run(debug=not IS_PRODUCTION)
