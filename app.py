@@ -1,4 +1,4 @@
-# app.py (Version 10.1 - Final Production Hardened with Autocommit)
+# app.py (Version 11.0 - The Inferred Production Build)
 
 import os
 import sqlite3
@@ -12,12 +12,12 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# --- CONFIGURATION ---
-IS_PRODUCTION = os.environ.get('IS_PRODUCTION', 'False').lower() == 'true'
+# --- NEW FOOLPROOF CONFIGURATION ---
+DATABASE_URL = os.environ.get('DATABASE_URL')
+IS_PRODUCTION = DATABASE_URL is not None
 
 if IS_PRODUCTION:
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-    DATABASE_URL = os.environ.get('DATABASE_URL')
     app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 else:
     app.config['SECRET_KEY'] = 'dev-secret'
@@ -34,7 +34,6 @@ def get_db():
     if 'db' not in g:
         if IS_PRODUCTION:
             g.db = psycopg2.connect(DATABASE_URL)
-            # THE DEFINITIVE FIX: AUTOCOMMIT MODE
             g.db.autocommit = True
         else:
             g.db = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
@@ -79,18 +78,21 @@ db_initialized = False
 @app.route('/init-database-on-first-run')
 def one_time_init():
     global db_initialized
-    if not IS_PRODUCTION: return "Production use only.", 403
-    if db_initialized: return "Database already initialized.", 403
+    if not IS_PRODUCTION:
+        return "This check has passed. You are in a local environment. This route is for production use only.", 403
+    if db_initialized:
+        return "Database has already been initialized. This route is now disabled.", 403
     try:
         init_db()
         db_initialized = True
-        return "SUCCESS: The database has been initialized.", 200
+        return "SUCCESS: The database has been initialized. This route is now permanently disabled.", 200
     except Exception as e:
-        return f"An error occurred: {e}", 500
+        return f"An error occurred during initialization: {e}", 500
 
 # --- HELPER FUNCTIONS ---
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def login_required(f):
     @wraps(f)
@@ -199,6 +201,9 @@ def logout():
 def admin_dashboard():
     return render_template('admin_dashboard.html')
 
+# Other admin routes and API routes would continue here, all using get_cursor()
+# For the sake of providing the complete working structure, they are included.
+
 @app.route('/admin/blog', methods=['GET', 'POST'])
 @login_required
 def admin_blog():
@@ -211,14 +216,12 @@ def admin_blog():
         
         if youtube_url:
             media_type = 'youtube'
-        elif not IS_PRODUCTION:
+        elif not IS_PRODUCTION: # File uploads are only processed in local dev
             file = request.files.get('file')
             if file and file.filename != '' and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 file_path = f"uploads/{filename}"
-                ext = filename.rsplit('.', 1)[1].lower()
-                if ext in ['png', 'jpg', 'jpeg', 'gif']: media_type = 'image'
         elif IS_PRODUCTION and 'file' in request.files and request.files['file'].filename != '':
             flash("File uploads are disabled on the live server.", "error")
         
@@ -230,6 +233,7 @@ def admin_blog():
     cursor.execute('SELECT * FROM blog ORDER BY date_posted DESC')
     posts = cursor.fetchall()
     return render_template('admin_blog.html', posts=posts)
+
 
 @app.route('/admin/payments', methods=['GET', 'POST'])
 @login_required
@@ -251,9 +255,17 @@ def admin_payments():
     international_methods = cursor.fetchall()
     return render_template('admin_payments.html', zambian_methods=zambian_methods, international_methods=international_methods)
 
-# ... other admin routes can be added here following the same pattern ...
+
+@app.route('/admin/payments/delete/<int:id>', methods=['POST'])
+@login_required
+def admin_delete_payment(id):
+    cursor = get_cursor()
+    query = "DELETE FROM payment_methods WHERE id = %s" if IS_PRODUCTION else "DELETE FROM payment_methods WHERE id = ?"
+    cursor.execute(query, (id,))
+    flash('Payment method deleted.', 'info')
+    return redirect(url_for('admin_payments'))
 
 
-# --- Main Execution ---
+# --- MAIN EXECUTION ---
 if __name__ == "__main__":
     app.run(debug=not IS_PRODUCTION)
